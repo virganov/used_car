@@ -1,0 +1,61 @@
+CREATE TABLE cities
+(
+    city_id SERIAL PRIMARY KEY,
+    city VARCHAR(50) NOT NULL,
+	latitude FLOAT(25) NOT NULL,
+	longitude FLOAT(25) NOT NULL
+);
+
+CREATE TABLE users
+(
+    user_id SERIAL PRIMARY KEY,
+    first_name VARCHAR(50) NOT NULL,
+	last_name VARCHAR(50) NOT NULL,
+	city_id INTEGER NOT NULL,
+	phone VARCHAR(25) NOT NULL,
+	CONSTRAINT fk_city
+		FOREIGN KEY (city_id)
+		REFERENCES cities(city_id)
+);
+
+CREATE TABLE products
+(
+    product_id SERIAL PRIMARY KEY,
+    merk VARCHAR(50) NOT NULL,
+	model VARCHAR(50) NOT NULL,
+	body_type VARCHAR(50) NOT NULL,
+	car_type VARCHAR(50) NOT NULL,
+	years INTEGER NOT NULL,
+	price INTEGER NOT NULL CHECK(price >=0)
+);
+
+CREATE TABLE advertisements
+(
+    ads_id SERIAL PRIMARY KEY,
+    product_id INTEGER NOT NULL,
+	user_id INTEGER NOT NULL,
+	title VARCHAR(100) NOT NULL,
+	date_post DATE NOT NULL,
+	CONSTRAINT fk_ads_product
+		FOREIGN KEY (product_id)
+		REFERENCES products(product_id),
+	CONSTRAINT fk_ads_user
+		FOREIGN KEY (user_id)
+		REFERENCES users(user_id)
+);
+
+CREATE TABLE bids
+(
+    bid_id SERIAL PRIMARY KEY,
+	user_id INTEGER NOT NULL,
+	product_id INTEGER NOT NULL,
+	date_bid DATE NOT NULL,
+	bid_price INTEGER NOT NULL CHECK(bid_price >=0),
+	bid_status VARCHAR(25) NOT NULL,
+	CONSTRAINT fk_bid_user
+		FOREIGN KEY (user_id)
+		REFERENCES users(user_id),
+	CONSTRAINT fk_bid_product
+		FOREIGN KEY (product_id)
+		REFERENCES products(product_id)
+);
