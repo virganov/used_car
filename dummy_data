@@ -1,0 +1,89 @@
+#import library
+from faker import Faker
+import pandas as pd
+import random
+from datetime import datetime, timedelta
+
+#set localization into Indonesia
+fake = Faker('id_ID')
+
+# read the excel file 
+loc_data = pd.read_excel('city.xlsx')
+loc_data.head
+
+
+def cities(loc_data):
+    """
+    create a DataFrame for cities.
+
+    Parameters:
+    - loc_data (pd.DataFrame): DataFrame containing location data.
+
+    Returns:
+    - pd.DataFrame: DataFrame containing city information including city_id, city name, latitude, and longitude.
+    """
+    city = {
+        "city_id": [],
+        "city": [],
+        "latitude": [],
+        "longitude": []
+    }
+
+    n_city = len(loc_data)
+
+    for i in range(n_city):
+        post_code = fake.postcode()
+        city["city_id"].append(loc_data['kota_id'].iloc[i])
+        city["city"].append(loc_data['nama_kota'].iloc[i])
+        city["latitude"].append(loc_data['latitude'].iloc[i])
+        city["longitude"].append(loc_data['longitude'].iloc[i])
+
+    city_df = pd.DataFrame(city)
+    return city_df
+
+city_df = cities(loc_data)
+print(city_df)
+
+
+      
+def users(n_users, city_df):
+    """
+    create a DataFrame for users.
+
+    Parameters:
+    - n_users (int): number of users.
+    - city_df (pd.DataFrame): DataFrame containing city information.
+
+    Returns:
+    - pd.DataFrame: DataFrame containing user information including user_id, first_name, last_name, city_id, and phone.
+    """
+    users = {
+        "user_id": [i + 1 for i in range(n_users)],
+        "first_name": [],
+        "last_name": [],
+        "city_id": [],
+        "phone": []
+    }
+
+    for i in range(n_users):
+        first_name = fake.first_name()
+        last_name = fake.last_name()
+        city_id = random.choice(city_df['city_id'])
+        phone = fake.phone_number()
+
+        users["first_name"].append(first_name)
+        users["last_name"].append(last_name)
+        users["city_id"].append(city_id)
+        users["phone"].append(phone)
+
+    user_df = pd.DataFrame(users)
+    return user_df
+
+
+n_users = 100
+users_df = users(n_users, city_df)
+print(users_df)
+
+# read the excel file 
+car_data = pd.read_excel('car_product.xlsx')
+car_data.head
