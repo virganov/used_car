@@ -11,6 +11,8 @@ fake = Faker('id_ID')
 loc_data = pd.read_excel('city.xlsx')
 loc_data.head
 
+car_data = pd.read_excel('car_product.xlsx')
+car_data.head
 
 def cities(loc_data):
     """
@@ -43,7 +45,6 @@ def cities(loc_data):
 
 city_df = cities(loc_data)
 print(city_df)
-
 
       
 def users(n_users, city_df):
@@ -79,11 +80,149 @@ def users(n_users, city_df):
     user_df = pd.DataFrame(users)
     return user_df
 
-
 n_users = 100
 users_df = users(n_users, city_df)
 print(users_df)
 
-# read the excel file 
-car_data = pd.read_excel('car_product.xlsx')
-car_data.head
+
+def products (product_data):
+    """
+    create a DataFrame for products.
+
+    Parameters:
+    - car_data (pd.DataFrame): DataFrame containing car data or products data.
+
+    Returns:
+    - pd.DataFrame: DataFrame containing products information including product_id, merk, model, body_type,
+                    car_type, years and price.
+    """
+    n_products = len(product_data)
+
+    products = {
+        "product_id": [i + 1 for i in range(n_products)],
+        "merk": [],
+        "model": [],
+        "body_type": [],
+        "car_type": [],
+        "years": [],
+        "price": []
+    }
+
+    for i in range(n_products):
+        merk = car_data['brand'].iloc[i]
+        model = car_data['model'].iloc[i]
+        body_type = car_data['body_type'].iloc[i]
+        car_type = random.choice(['Manual', 'Automatic'])
+        years = car_data['year'].iloc[i]
+        price = car_data['price'].iloc[i]
+
+        products["merk"].append(merk)
+        products["model"].append(model)
+        products["body_type"].append(body_type)
+        products["car_type"].append(car_type)
+        products["years"].append(years)
+        products["price"].append(price)
+
+    product_df = pd.DataFrame(products)
+    return product_df
+
+products_df = products(product_data)
+print(products_df)
+
+
+def advertisements(n_ads, products_df, users_df):
+    """
+    create a DataFrame for advertisments.
+
+    Parameters:
+    - n_ads (int): number of advertisments.
+    - users_df (pd.DataFrame): DataFrame containing user information.
+    - products_df (pd.DataFrame): DataFrame containing product information.
+
+    Returns:
+    - pd.DataFrame: DataFrame containing advertisments information including ads_id, product_id, user_id, title and date_post.
+    """
+    ads = {
+        "ads_id": [i + 1 for i in range(n_ads)],
+        "product_id": [],
+        "user_id": [],
+        "title": [],
+        "date_post": []
+    }
+
+    for i in range(n_ads):
+        product_id = random.choice(products_df['product_id'])
+        user_id = random.choice(users_df['user_id'])
+        title = f"Dijual mobil {products_df.loc[product_id -1]['model']} tahun {products_df.loc[product_id -1]['years']}"
+        date_post = fake.date_time_between(start_date=datetime(2023, 1, 1), end_date=datetime.now())
+
+        ads["product_id"].append(product_id)
+        ads["user_id"].append(user_id)
+        ads["title"].append(title)
+        ads["date_post"].append(date_post)
+
+    ads_df = pd.DataFrame(ads)
+    return ads_df
+
+n_ads = 150
+ads_df = ads(n_ads, products_df, users_df)
+print(ads_df)
+
+
+def bids(n_bids, users_df, ads_df):
+    """
+    create a DataFrame for bids.
+
+    Parameters:
+    - n_bids (int): number of bids.
+    - users_df (pd.DataFrame): DataFrame containing user information.
+    - products_df (pd.DataFrame): DataFrame containing product information.
+
+    Returns:
+    - pd.DataFrame: DataFrame containing bid information including bid_id, user_id, product_id, date_bid,
+                    bid_price, and bid_status.
+    """
+    bids = {
+        "bid_id": [i + 1 for i in range(n_bids)],
+        "user_id": [],
+        "product_id": [],
+        "date_bid": [],
+        "bid_price": [],
+        "bid_status" : []
+    }
+
+    for i in range(n_bids):
+        user_id = random.choice(users_df['user_id'])
+        product_id = random.choice(products_df['product_id'])
+        date_bid = fake.date_time_between(start_date=datetime(2023, 1, 1), end_date=datetime.now())
+        bid_price = random.randint(80_000_000, 400_000_000)
+        bid_status = random.choices(['Sent','Failed'], weights=[0.9, 0.1])[0]
+
+        bids["user_id"].append(user_id)
+        bids["product_id"].append(product_id)
+        bids["date_bid"].append(date_bid)
+        bids["bid_price"].append(bid_price)
+        bids["bid_status"].append(bid_status)
+
+    bids_df = pd.DataFrame(bids)
+    return bids_df
+
+n_bids = 150
+bids_df = bids(n_bids, users_df, ads_df)
+print(bids_df)
+
+
+#import data city to csv
+city_df.to_csv('city.csv', index=False)
+
+#import data user to csv
+users_df.to_csv('user.csv', index=False)
+
+#import data product to csv
+products_df.to_csv('car_product.csv', index=False)
+
+#import data ads to csv
+ads_df.to_csv('ads.csv', index=False)
+
+#import data bids to csv
+bids_df.to_csv('bid.csv', index=False)
