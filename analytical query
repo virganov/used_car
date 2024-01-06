@@ -1,0 +1,131 @@
+--1. Ranking popularity of models based on the number of bids
+SELECT 
+	p.model, 
+	COUNT(distinct p.product_id) as count_product, 
+	COUNT(b.bid_id) as count_bid
+FROM 
+	products as p
+LEFT JOIN advertisements as a 
+	ON a.product_id = p.product_id
+LEFT JOIN bids as b 
+	ON b.product_id = p.product_id
+GROUP BY 1
+ORDER BY 3 DESC;
+
+--2. Comparing product prices based on the average price per city
+SELECT
+	c.city,
+	p.merk,
+	p.model,
+	p.years,
+	p.price,
+	AVG(price) OVER(PARTITION BY city) AS avg_city_price
+FROM advertisements as a
+LEFT JOIN users as u
+	ON u.user_id = a.user_id
+LEFT JOIN cities as c
+	ON u.city_id = c.city_id
+LEFT JOIN products as p
+	ON a.product_id = p.product_id
+ORDER BY 1;
+
+--3. find the comparison of dates when users placed bids with the next bid date and the offered bid price.
+WITH bid_prices as (
+    SELECT
+        p.model,
+        first_bid.user_id,
+        first_bid.date_bid as first_bid_date,
+        next_bid.date_bid as next_bid_date,
+        first_bid.bid_price as first_bid_price,
+        next_bid.bid_price as next_bid_price
+    FROM
+        bids first_bid
+    JOIN bids next_bid 
+		ON first_bid.product_id = next_bid.product_id AND first_bid.date_bid < next_bid.date_bid
+    JOIN products as p 
+		ON first_bid.product_id = p.product_id
+    WHERE
+        p.model = 'Toyota Yaris'
+)
+
+SELECT
+    model,
+    user_id,
+    first_bid_date,
+    next_bid_date,
+    first_bid_price,
+    next_bid_price
+FROM
+    bid_prices
+ORDER BY 3 ASC;
+
+--4. Comparing the percentage difference in the average price based on their models and the average bid prices offered by customers in the last 6 months.
+WITH avg_product_price as (
+    SELECT
+        p.model,
+        AVG(p.price)::int as avg_price
+    FROM
+        products as p
+    GROUP BY 1
+),
+avg_bid_price as (
+    SELECT
+        p.model,
+        AVG(b.bid_price) as avg_bid_6month
+    FROM
+        bids as b
+    LEFT JOIN products as p 
+	ON b.product_id = p.product_id
+    WHERE
+        b.date_bid >= current_date - interval '6 months'
+    GROUP BY 1
+)
+SELECT
+    avg_product_price.model,
+    avg_product_price.avg_price,
+    round(COALESCE(avg_bid_price.avg_bid_6month,0),2) as avg_bid_6month,
+    round(avg_product_price.avg_price - COALESCE(avg_bid_price.avg_bid_6month,0),2) as difference,
+    round(((avg_product_price.avg_price - COALESCE(avg_bid_price.avg_bid_6month,0)) / avg_product_price.avg_price * 100),2) AS difference_percent
+FROM
+    avg_product_price
+LEFT JOIN avg_bid_price 
+	ON avg_product_price.model = avg_bid_price.model
+ORDER BY 1;
+
+--5. Creating a window function for the average bid price of a car brand and model in the last 6 months.
+WITH avg_bids as (
+    SELECT
+    	merk,
+    	model,
+    	AVG(b.bid_price) FILTER (WHERE extract(month FROM b.date_bid) = extract(month FROM current_date - interval '6 months')) as m_min_6,
+        AVG(b.bid_price) FILTER (WHERE extract(month FROM b.date_bid) = extract(month FROM current_date - interval '5 months')) as m_min_5,
+        AVG(b.bid_price) FILTER (WHERE extract(month FROM b.date_bid) = extract(month FROM current_date - interval '4 months')) as m_min_4,
+        AVG(b.bid_price) FILTER (WHERE extract(month FROM b.date_bid) = extract(month FROM current_date - interval '3 months')) as m_min_3,
+        AVG(b.bid_price) FILTER (WHERE extract(month FROM b.date_bid) = extract(month FROM current_date - interval '2 months')) as m_min_2,
+        AVG(b.bid_price) FILTER (WHERE extract(month FROM b.date_bid) = extract(month FROM current_date - interval '1 month')) as m_min_1,
+        RANK() OVER (PARTITION BY p.merk, p.model ORDER BY b.date_bid DESC) AS row_num
+	FROM
+   		products as p
+	JOIN advertisements as a
+		ON p.product_id = a.product_id
+	JOIN bids as b 
+		ON a.product_id = b.product_id
+	WHERE
+    	p.merk = 'Toyota' AND p.model = 'Toyota Yaris'
+    	AND
+		b.date_bid >= current_date - interval '6 months'
+	GROUP BY 1,2, b.date_bid
+	ORDER BY 1,2
+)
+SELECT
+    merk,
+    model,
+    AVG(m_min_6) as m_min_6,
+    AVG(m_min_5) as m_min_5,
+    AVG(m_min_4) as m_min_4,
+    AVG(m_min_3) as m_min_3,
+    AVG(m_min_2) as m_min_2,
+    AVG(m_min_1) as m_min_1
+FROM
+    avg_bids
+GROUP BY 1,2;
