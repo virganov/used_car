@@ -12,3 +12,6 @@ This project has some limitations, including:
 2. Every user can search for offered cars based on the seller's location, car brand, and body type.
 3. If a potential buyer is interested in a car, they can bid on the product if the seller allows the bidding feature.
 4. Purchase transactions are conducted outside the application and are not within the project scope.
+
+## ERD
+![image](https://github.com/virganov/used_car/assets/155287274/63124ebf-4ba9-4a11-b231-62ea63c86c3e)
