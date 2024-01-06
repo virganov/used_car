@@ -1,0 +1,43 @@
+COPY
+	cities
+FROM
+	'C:\Users\HP\Downloads\city.csv'
+DELIMITER ','
+CSV
+HEADER;
+
+
+COPY
+	users
+FROM
+	'C:\Users\HP\Downloads\user.csv'
+DELIMITER ','
+CSV
+HEADER;
+
+
+COPY
+	products
+FROM
+	'C:\Users\HP\Downloads\car_product.csv'
+DELIMITER ','
+CSV
+HEADER;
+
+
+COPY
+	advertisements
+FROM
+	'C:\Users\HP\Downloads\ads.csv'
+DELIMITER ','
+CSV
+HEADER;
+
+
+COPY
+	bids
+FROM
+	'C:\Users\HP\Downloads\bid.csv'
+DELIMITER ','
+CSV
+HEADER;
