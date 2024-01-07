@@ -14,7 +14,7 @@ ORDER BY 4;
 INSERT INTO bids (bid_id, product_id, user_id, date_bid, bid_price, bid_status) VALUES (151, 5,11,'2023-05-11',495_500_000,'Sent');
 select * from bids
 
---3. Viewing all cars sold by 'Umi Novitasari'
+--3. Viewing all cars sold by 'Wasis Januar'
 select * from users
 SELECT
 	p.product_id,
@@ -28,7 +28,7 @@ JOIN advertisements as a
 	ON p.product_id = a.product_id
 JOIN users as u 
 	ON u.user_id = a.user_id
-WHERE CONCAT(u.first_name, ' ', u.last_name) = 'Umi Novitasari'
+WHERE CONCAT(u.first_name, ' ', u.last_name) = 'Wasis Januar'
 ORDER BY 6 DESC;
 
 --4. Finding the cheapest used cars based on keyword 'Yaris'
@@ -42,3 +42,32 @@ FROM
 	products as p
 WHERE model LIKE '%Yaris%'
 ORDER BY 4;
+
+
+--5. Finding the nearest used cars based on a city ID, and clostest distance are calculate with euclidean distance based on the latitude and longitude
+WITH user_location as (
+    SELECT
+        city_id,
+        latitude,
+        longitude
+    FROM cities
+    WHERE city_id = 3173
+)
+
+SELECT
+    p.product_id,
+    p.merk,
+	p.model,
+    p.years,
+	ads.price,
+    SQRT(POW((user_location.latitude - c.latitude), 2) + POW((user_location.longitude - c.longitude), 2)) as distance
+FROM advertisements as ads
+JOIN products as p
+	ON ads.product_id = p.product_id
+JOIN users as u ON 
+	ads.user_id = u.user_id
+JOIN cities as c
+	ON u.city_id = c.city_id
+JOIN user_location ON TRUE
+WHERE ads.date_post >= current_date - interval '6 months'
+ORDER BY 6 ASC;
