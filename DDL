@@ -35,6 +35,7 @@ CREATE TABLE advertisements
     product_id INTEGER NOT NULL,
 	user_id INTEGER NOT NULL,
 	title VARCHAR(100) NOT NULL,
+	price INTEGER NOT NULL CHECK(price >=0),
 	date_post DATE NOT NULL,
 	CONSTRAINT fk_ads_product
 		FOREIGN KEY (product_id)
