@@ -14,4 +14,5 @@ This project has some limitations, including:
 4. Purchase transactions are conducted outside the application and are not within the project scope.
 
 ## ERD
-![image](https://github.com/virganov/used_car/assets/155287274/63124ebf-4ba9-4a11-b231-62ea63c86c3e)
+![image](https://github.com/virganov/used_car/assets/155287274/c96c6fb5-bdae-4c2e-8896-2f86794acc13)
+
