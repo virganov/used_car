@@ -140,34 +140,36 @@ def advertisements(n_ads, products_df, users_df):
     - products_df (pd.DataFrame): DataFrame containing product information.
 
     Returns:
-    - pd.DataFrame: DataFrame containing advertisments information including ads_id, product_id, user_id, title and date_post.
+    - pd.DataFrame: DataFrame containing advertisments information including ads_id, product_id, user_id, title, price and date_post.
     """
-    ads = {
+        ads = {
         "ads_id": [i + 1 for i in range(n_ads)],
         "product_id": [],
         "user_id": [],
         "title": [],
+        "price": [],
         "date_post": []
     }
 
     for i in range(n_ads):
         product_id = random.choice(products_df['product_id'])
         user_id = random.choice(users_df['user_id'])
-        title = f"Dijual mobil {products_df.loc[product_id -1]['model']} tahun {products_df.loc[product_id -1]['years']}"
+        title = f"Dijual mobil {products_df.loc[product_id - 1]['model']} tahun {products_df.loc[product_id - 1]['years']}"
+        price = products_df['price'].iloc[product_id - 1]
         date_post = fake.date_time_between(start_date=datetime(2023, 1, 1), end_date=datetime.now())
 
         ads["product_id"].append(product_id)
         ads["user_id"].append(user_id)
         ads["title"].append(title)
+        ads["price"].append(price)
         ads["date_post"].append(date_post)
 
     ads_df = pd.DataFrame(ads)
     return ads_df
 
 n_ads = 150
-ads_df = ads(n_ads, products_df, users_df)
+ads_df = advertisements(n_ads, products_df, users_df)
 print(ads_df)
-
 
 def bids(n_bids, users_df, ads_df):
     """
